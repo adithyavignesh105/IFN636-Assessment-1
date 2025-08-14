@@ -4,4 +4,7 @@ const { addItem} = require('../controllers/itemController');
 const { protect } = require('../middleware/authMiddleware');
 
 router.route('/')
-  .post(protect, addItem);
+  .post(protect, addItem)
+  .get(protect, getApprovedItems);
+
+router.get('/my', protect, getMyItems);
