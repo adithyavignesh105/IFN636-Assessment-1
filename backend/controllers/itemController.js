@@ -10,7 +10,6 @@ const addItem = async (req, res) => {
             title,
             description,
             type,
-            image: imagePath,
             deadline
         });
 
