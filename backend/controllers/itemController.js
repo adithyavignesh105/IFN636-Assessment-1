@@ -46,7 +46,11 @@ const updateItem = async (req, res) => {
     try {
         const item = await Item.findById(req.params.id);
         if (!item) return res.status(404).json({ message: 'Item not found' });
-        
+
+        if (req.user.role !== 'admin' && item.userId.toString() !== req.user.id) {
+            return res.status(403).json({ message: 'Not authorized to update this item' });
+        }
+
         const { title, description, type, deadline } = req.body;
         if (title) item.title = title;
         if (description) item.description = description;
