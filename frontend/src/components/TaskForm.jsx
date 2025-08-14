@@ -2,69 +2,112 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import axiosInstance from '../axiosConfig';
 
-const TaskForm = ({ tasks, setTasks, editingTask, setEditingTask }) => {
-  const { user } = useAuth();
-  const [formData, setFormData] = useState({ title: '', description: '', deadline: '' });
+const TaskForm = ({ editingTask, setEditingTask, onSave }) => {
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [type, setType] = useState('lost');
+  const [deadline, setDeadline] = useState('');
+  const [image, setImage] = useState(null);
 
   useEffect(() => {
     if (editingTask) {
-      setFormData({
-        title: editingTask.title,
-        description: editingTask.description,
-        deadline: editingTask.deadline,
-      });
+      setTitle(editingTask.title);
+      setDescription(editingTask.description);
+      setType(editingTask.type);
+      setDeadline(editingTask.deadline ? editingTask.deadline.split('T')[0] : '');
+      setImage(null); // reset file input
     } else {
-      setFormData({ title: '', description: '', deadline: '' });
+      setTitle('');
+      setDescription('');
+      setType('lost');
+      setDeadline('');
+      setImage(null);
     }
   }, [editingTask]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const formData = new FormData();
+    formData.append('title', title);
+    formData.append('description', description);
+    formData.append('type', type);
+    if (deadline) formData.append('deadline', deadline);
+    if (image) formData.append('image', image);
+
     try {
       if (editingTask) {
-        const response = await axiosInstance.put(`/api/tasks/${editingTask._id}`, formData, {
-          headers: { Authorization: `Bearer ${user.token}` },
+        // update existing
+        await axiosInstance.put(`/items/${editingTask._id}`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
         });
-        setTasks(tasks.map((task) => (task._id === response.data._id ? response.data : task)));
       } else {
-        const response = await axiosInstance.post('/api/tasks', formData, {
-          headers: { Authorization: `Bearer ${user.token}` },
+        // create new
+        await axiosInstance.post('/items', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
         });
-        setTasks([...tasks, response.data]);
       }
+      onSave();
       setEditingTask(null);
-      setFormData({ title: '', description: '', deadline: '' });
     } catch (error) {
-      alert('Failed to save task.');
+      alert('Error saving item: ' + error.message);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-6 shadow-md rounded mb-6">
-      <h1 className="text-2xl font-bold mb-4">{editingTask ? 'Your Form Name: Edit Operation' : 'Your Form Name: Create Operation'}</h1>
-      <input
-        type="text"
-        placeholder="Title"
-        value={formData.title}
-        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-        className="w-full mb-4 p-2 border rounded"
-      />
-      <input
-        type="text"
-        placeholder="Description"
-        value={formData.description}
-        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-        className="w-full mb-4 p-2 border rounded"
-      />
-      <input
-        type="date"
-        value={formData.deadline}
-        onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
-        className="w-full mb-4 p-2 border rounded"
-      />
-      <button type="submit" className="w-full bg-blue-600 text-white p-2 rounded">
-        {editingTask ? 'Update Button' : 'Create Button'}
+    <form onSubmit={handleSubmit} className="mb-6 p-4 border rounded">
+      <h2 className="text-lg font-bold mb-2">{editingTask ? 'Edit Item' : 'Add Item'}</h2>
+      <div className="mb-2">
+        <label>Title</label>
+        <input
+          className="border p-1 w-full"
+          type="text"
+          value={title}
+          onChange={e => setTitle(e.target.value)}
+          required
+        />
+      </div>
+      <div className="mb-2">
+        <label>Description</label>
+        <textarea
+          className="border p-1 w-full"
+          value={description}
+          onChange={e => setDescription(e.target.value)}
+          required
+        />
+      </div>
+      <div className="mb-2">
+        <label>Type</label>
+        <select value={type} onChange={e => setType(e.target.value)} className="border p-1 w-full">
+          <option value="lost">Lost</option>
+          <option value="found">Found</option>
+        </select>
+      </div>
+      <div className="mb-2">
+        <label>Deadline</label>
+        <input
+          type="date"
+          className="border p-1 w-full"
+          value={deadline}
+          onChange={e => setDeadline(e.target.value)}
+        />
+      </div>
+      <div className="mb-2">
+        <label>Image</label>
+        <input type="file" onChange={e => setImage(e.target.files[0])} />
+      </div>
+      <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">
+        {editingTask ? 'Update' : 'Add'}
       </button>
+      {editingTask && (
+        <button
+          type="button"
+          className="ml-2 px-4 py-2 border rounded"
+          onClick={() => setEditingTask(null)}
+        >
+          Cancel
+        </button>
+      )}
     </form>
   );
 };
