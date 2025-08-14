@@ -18,3 +18,4 @@ router.put('/:id/approve', protect, admin, approveItem);
 
 router.put('/:id/reject', protect, admin, rejectItem);
 
+module.exports = router;
