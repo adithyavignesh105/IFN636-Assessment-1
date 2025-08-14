@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { addItem, getApprovedItems, getMyItems,  updateItem } = require('../controllers/itemController');
 const { protect } = require('../middleware/authMiddleware');
+const upload = require('../middleware/uploadMiddleware');
 
 router.route('/')
   .post(protect, addItem)
