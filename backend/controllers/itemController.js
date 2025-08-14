@@ -61,9 +61,61 @@ const updateItem = async (req, res) => {
     }
 };
 
+// Admin get pending items
+const getPendingItems = async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Admin access required' });
+        }
+        const items = await Item.find({ status: 'pending' });
+        res.json(items);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// Admin approve item
+const approveItem = async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Admin access required' });
+        }
+        
+        const item = await Item.findById(req.params.id);
+        if (!item) return res.status(404).json({ message: 'Item not found' });
+
+        item.status = 'approved';
+        await item.save();
+        res.json({ message: 'Item approved' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// Admin reject item
+const rejectItem = async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Admin access required' });
+        }
+        
+        const item = await Item.findById(req.params.id);
+        if (!item) return res.status(404).json({ message: 'Item not found' });
+
+        item.status = 'rejected';
+        await item.save();
+        res.json({ message: 'Item rejected' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 module.exports = {
     addItem,
     getApprovedItems,
     getMyItems,
-    updateItem
+    updateItem,
+    getPendingItems,
+    approveItem,
+    rejectItem
 };
