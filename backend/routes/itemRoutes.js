@@ -4,8 +4,9 @@ const { addItem, getApprovedItems, getMyItems, updateItem, getPendingItems, appr
 const { protect, admin } = require('../middleware/authMiddleware');
 const upload = require('../middleware/uploadMiddleware');
 
+
 router.route('/')
-  .post(protect, addItem)
+  .post(protect, upload.single('image'), addItem)
   .get(protect, getApprovedItems);
 
 router.get('/my', protect, getMyItems);
@@ -17,5 +18,6 @@ router.get('/pending', protect, admin, getPendingItems);
 router.put('/:id/approve', protect, admin, approveItem);
 
 router.put('/:id/reject', protect, admin, rejectItem);
+
 
 module.exports = router;
