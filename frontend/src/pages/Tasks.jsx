@@ -36,6 +36,8 @@ const Tasks = () => {
       data.append('title', formData.title);
       data.append('description', formData.description);
       data.append('type', formData.type);
+      data.append('campus', formData.campus);
+      data.append('location', formData.location);
       data.append('deadline', formData.deadline);
       if (imageFile) data.append('image', imageFile);
 

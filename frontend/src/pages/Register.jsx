@@ -1,10 +1,40 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../axiosConfig';
 
 const Register = () => {
-  const [formData, setFormData] = useState({ name: '', email: '', password: '' });
+  const [formData, setFormData] = useState({ name: '', email: '', password: '', university:'Queensland University of Technology', role:'Student' });
+  const [roles, setRoles] = useState([]);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const res = await axiosInstance.get('/api/auth/roles');
+        let roleArray = [];
+
+        if (Array.isArray(res.data)) {
+          roleArray = res.data;
+        }
+        else if (res.data.roles && Array.isArray(res.data.roles)) {
+          roleArray = res.data.roles;
+        }
+
+        setRoles(roleArray);
+
+        if (roleArray.includes('Student')) {
+          setFormData(prev => ({ ...prev, role: 'Student' }));
+        } else if (roleArray.length > 0) {
+          setFormData(prev => ({ ...prev, role: roleArray[0] }));
+        }
+
+      } catch (error) {
+        console.error('Failed to fetch roles:', error);
+      }
+    };
+
+    fetchRoles();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -42,6 +72,25 @@ const Register = () => {
           onChange={(e) => setFormData({ ...formData, password: e.target.value })}
           className="w-full mb-4 p-2 border rounded"
         />
+        <input
+          type="university"
+          placeholder="university"
+          value={formData.university}
+          onChange={(e) => setFormData({ ...formData, university: e.target.value })}
+          className="w-full mb-4 p-2 border rounded"
+        />
+        <select
+          value={formData.role}
+          onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+          className="w-full mb-4 p-2 border rounded"
+          required
+        >
+          {roles.map(role => (
+            <option key={role} value={role}>
+              {role.charAt(0).toUpperCase() + role.slice(1)}
+            </option>
+          ))}
+        </select>
         <button type="submit" className="w-full bg-green-600 text-white p-2 rounded">
           Register
         </button>

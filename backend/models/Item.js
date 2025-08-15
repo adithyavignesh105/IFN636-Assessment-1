@@ -7,6 +7,8 @@ const itemSchema = new mongoose.Schema({
     description: { type: String },
     type: { type: String, enum: ['lost', 'found'], required: true },
     image: { type: String },
+    campus: {type:String, enum: ['Gardens Point', 'Kelvin Grove']},
+    location: { type: String },
     status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
     createdAt: { type: Date, default: Date.now },
     deadline: { type: Date }
