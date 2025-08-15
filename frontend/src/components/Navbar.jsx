@@ -14,26 +14,16 @@ const Navbar = () => {
     <nav className="bg-orange-600 text-white p-4 flex justify-between items-center">
       <Link to="/" className="text-2xl font-bold">QUT Lost & Found</Link>
       <div>
-        {user ? (
+        {user && (
           <>
-            <Link to="/tasks" className="mr-4">Lost / Found</Link>
+            <Link to="/" className="mr-4">Lost / Found</Link> {/* 改成 Home.jsx */}
             <Link to="/profile" className="mr-4">Profile</Link>
             <button
               onClick={handleLogout}
-              className="bg-red-500 px-4 py-2 rounded hover:bg-red-700"
+              className="bg-purple-600 px-4 py-2 rounded hover:bg-purple-800 text-white shadow-md transition"
             >
               Logout
             </button>
-          </>
-        ) : (
-          <>
-            <Link to="/login" className="mr-4">Login</Link>
-            <Link
-              to="/register"
-              className="bg-green-500 px-4 py-2 rounded hover:bg-green-700"
-            >
-              Register
-            </Link>
           </>
         )}
       </div>

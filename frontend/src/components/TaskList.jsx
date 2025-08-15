@@ -3,7 +3,8 @@ import { useAuth } from '../context/AuthContext';
 const TaskList = ({ tasks, setEditingTask, onDelete, onApprove, onReject }) => {
   const { user } = useAuth();
 
-  if (!tasks.length) return <p>No items found.</p>;
+  if (!tasks.length) return <div><p className="text-gray-400">You have not submitted any lost or found items yet.</p>
+  <p className="text-gray-400">This list is currently empty.</p></div>;
 
   return (
     <div>
@@ -13,12 +14,10 @@ const TaskList = ({ tasks, setEditingTask, onDelete, onApprove, onReject }) => {
           <p>{task.description}</p>
           {task.deadline && (
             <p className="text-sm text-gray-500">
-              Deadline: {new Date(task.deadline).toLocaleDateString()}
+              {task.type === 'Lost' ? 'Item Lost Date' : 'Item Found Date'}: {new Date(task.deadline).toLocaleDateString()}
             </p>
           )}
-          {task.image && (
-            <img src={task.image} alt={task.title} className="my-2 max-w-xs" />
-          )}
+          <p>{task.campus}</p>
           <div className="mt-2 space-x-2">
             {user?.role === 'admin' ? (
               <>

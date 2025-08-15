@@ -71,6 +71,25 @@ const updateItem = async (req, res) => {
   }
 };
 
+// Delete item
+const deleteItem = async (req, res) => {
+  try {
+    const item = await Item.findById(req.params.id);
+    if (!item) return res.status(404).json({ message: 'Item not found' });
+
+    // Admin can delete item, user can delete their own item
+    if (req.user.role !== 'admin' && item.userId.toString() !== req.user.id) {
+      return res.status(403).json({ message: 'Not authorized to delete this item' });
+    }
+
+    await item.remove();
+    res.json({ message: 'Item deleted successfully' });
+  } catch (error) {
+    console.error('deleteItem error:', error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // Admin get pending items
 const getPendingItems = async (req, res) => {
   try {
@@ -125,6 +144,7 @@ module.exports = {
   getApprovedItems,
   getMyItems,
   updateItem,
+  deleteItem,
   getPendingItems,
   approveItem,
   rejectItem

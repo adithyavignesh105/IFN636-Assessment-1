@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
-import axiosInstance from '../axiosConfig';
-import TaskForm from '../components/TaskForm';
 import TaskList from '../components/TaskList';
+import axiosInstance from '../axiosConfig';
 import { useAuth } from '../context/AuthContext';
 
-const Tasks = () => {
+const TasksList = () => {
   const { user } = useAuth();
   const [tasks, setTasks] = useState([]);
   const [editingTask, setEditingTask] = useState(null);
@@ -26,27 +25,12 @@ const Tasks = () => {
     fetchTasks();
   }, [user]);
 
-const handleFormSubmit = async (payload) => {
-  try {
-    let res;
-    if (editingTask) {
-      res = await axiosInstance.put(`/api/items/${editingTask._id}`, payload, {
-        headers: { Authorization: `Bearer ${user.token}` },
-      });
-      setTasks(tasks.map(t => (t._id === res.data._id ? res.data : t)));
-    } else {
-      res = await axiosInstance.post('/api/items', payload, {
-        headers: { Authorization: `Bearer ${user.token}` },
-      });
-      setTasks([...tasks, res.data]);
-    }
-    setEditingTask(null);
-  } catch (error) {
-    alert('Failed to save task.');
-    console.error(error);
-  }
-};
-
+  const handleDelete = async (id) => {
+    try {
+      await axiosInstance.delete(`/api/items/${id}`, { headers: { Authorization: `Bearer ${user.token}` } });
+      setTasks(tasks.filter(t => t._id !== id));
+    } catch (error) { alert('Delete failed.'); console.error(error); }
+  };
 
   const handleApprove = async (id) => {
     try {
@@ -62,14 +46,6 @@ const handleFormSubmit = async (payload) => {
     } catch (error) { alert('Reject failed.'); console.error(error); }
   };
 
-  const handleDelete = async (id) => {
-    try {
-      await axiosInstance.delete(`/api/items/${id}`, { headers: { Authorization: `Bearer ${user.token}` } });
-      setTasks(tasks.filter(t => t._id !== id));
-    } catch (error) { alert('Delete failed.'); console.error(error); }
-  };
-
-  if (!user) return <p>Please login to view your tasks.</p>;
   if (loading) return <p>Loading...</p>;
 
   return (
@@ -94,13 +70,10 @@ const handleFormSubmit = async (payload) => {
           }
         </>
       ) : (
-        <>
-          <TaskForm editingTask={editingTask} setEditingTask={setEditingTask} onSubmit={handleFormSubmit} />
-          <TaskList tasks={tasks} setEditingTask={setEditingTask} onDelete={handleDelete} />
-        </>
+        <TaskList tasks={tasks} setEditingTask={setEditingTask} onDelete={handleDelete} onApprove={handleApprove} onReject={handleReject} />
       )}
     </div>
   );
 };
 
-export default Tasks;
+export default TasksList;
