@@ -12,7 +12,9 @@ router.route('/')
 
 router.get('/my', protect, getMyItems);
 
-router.put('/:id', protect, upload.single('image'), updateItem);
+//router.put('/:id', protect, upload.single('image'), updateItem);
+
+router.put('/:id', protect, updateItem);
 
 router.get('/pending', protect, admin, getPendingItems);
 

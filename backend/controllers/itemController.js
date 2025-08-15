@@ -2,23 +2,41 @@ const Item = require('../models/Item');
 
 // Add item
 const addItem = async (req, res) => {
-    try {
-        const { title, description, type, deadline } = req.body;
-        const imagePath = req.file ? `/uploads/${req.file.filename}` : null;
+  try {
+    const { title, description, type, campus, location, deadline } = req.body;
 
-        const item = await Item.create({
-            userId: req.user.id,
-            title,
-            description,
-            type,
-            image: imagePath,
-            deadline
-        });
+    // Multer might throw error if file invalid
+    // let imagePath = null;
+    // if (req.file) {
+    //   imagePath = `/uploads/${req.file.filename}`;
+    // }
 
-        res.status(201).json(item);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+    // Log for debugging
+    console.log('addItem req.body:', req.body);
+    console.log('addItem req.file:', req.file);
+
+    const item = await Item.create({
+      userId: req.user.id,
+      title,
+      description,
+      type,
+      campus: campus || undefined,
+      location,
+      //image: imagePath,
+      deadline
+    });
+
+    res.status(201).json(item);
+  } catch (error) {
+    console.error('addItem error:', error);
+    
+    // If multer file filter error
+    // if (error instanceof multer.MulterError || error.message.includes('Only images')) {
+    //   return res.status(400).json({ message: error.message });
+    // }
+
+    res.status(500).json({ message: 'Internal server error' });
+  }
 };
 
 // Get approved items（for user listing）
@@ -51,16 +69,19 @@ const updateItem = async (req, res) => {
             return res.status(403).json({ message: 'Not authorized to update this item' });
         }
 
-        const { title, description, type, deadline } = req.body;
+        const { title, description, type, campus, location, deadline } = req.body;
         if (title) item.title = title;
         if (description) item.description = description;
         if (type) item.type = type;
-        if (req.file) item.image = `/uploads/${req.file.filename}`;
+        if (campus) item.campus = campus;
+        if (location) item.location = location;
+        //if (req.file) item.image = `/uploads/${req.file.filename}`;
         if (deadline) item.deadline = deadline;
 
         const updatedItem = await item.save();
         res.json(updatedItem);
     } catch (error) {
+        console.error('updateItem error:', error);
         res.status(500).json({ message: error.message });
     }
 };

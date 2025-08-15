@@ -4,7 +4,7 @@ import axiosInstance from '../axiosConfig';
 const TaskForm = ({ editingTask, setEditingTask, onSubmit }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [type, setType] = useState('lost'); // default
+  const [type, setType] = useState('Lost'); // default
   const [deadline, setDeadline] = useState('');
   const [image, setImage] = useState(null);
 
@@ -24,7 +24,7 @@ const TaskForm = ({ editingTask, setEditingTask, onSubmit }) => {
         const res = await axiosInstance.get('/api/items/types');
         const enumTypes = Array.isArray(res.data) ? res.data : [];
         setTypes(enumTypes);
-        setType(prev => prev || (enumTypes.includes('lost') ? 'lost' : enumTypes[0] || ''));
+        setType(prev => prev || (enumTypes.includes('Lost') ? 'Lost' : enumTypes[0] || ''));
       } catch (err) {
         console.error('Failed to fetch item types:', err);
       } finally {
@@ -36,7 +36,6 @@ const TaskForm = ({ editingTask, setEditingTask, onSubmit }) => {
 
   // Set campus LOV
   useEffect(() => {
-    // 直接用 model enum
     const enumCampuses = ['Gardens Point', 'Kelvin Grove'];
     setCampuses(enumCampuses);
     setCampus(prev => prev || enumCampuses[0]);
@@ -48,35 +47,42 @@ const TaskForm = ({ editingTask, setEditingTask, onSubmit }) => {
     if (editingTask) {
       setTitle(editingTask.title || '');
       setDescription(editingTask.description || '');
-      setType(editingTask.type || 'lost');
+      setType(types.includes(editingTask.type) ? editingTask.type : 'Lost');
       setDeadline(editingTask.deadline ? editingTask.deadline.split('T')[0] : '');
-      setCampus(editingTask.campus || campuses[0] || '');
+      setCampus(campuses.includes(editingTask.campus) ? editingTask.campus : 'Gardens Point');
       setLocation(editingTask.location || '');
       setImage(null);
     } else {
       setTitle('');
       setDescription('');
-      setType(types[0] || 'lost');
+      setType(types[0] || 'Lost');
       setDeadline('');
-      setCampus(campuses[0] || '');
+      setCampus(campuses[0] || 'Gardens Point');
       setLocation('');
       setImage(null);
     }
   }, [editingTask, campuses, types]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const formData = new FormData();
-    formData.append('title', title);
-    formData.append('description', description);
-    formData.append('type', type);
-    formData.append('campus', campus);
-    formData.append('location', location);
-    if (deadline) formData.append('deadline', deadline);
-    if (image) formData.append('image', image);
+const handleSubmit = (e) => {
+  e.preventDefault();
+  const formData = new FormData();
 
-    onSubmit(formData, image);
-  };
+  formData.append('title', title || '');
+  formData.append('description', description || '');
+
+  const validType = types.includes(type) ? type : 'Lost';
+  formData.append('type', validType);
+
+  const validCampus = campuses.includes(campus) ? campus : 'Gardens Point';
+  formData.append('campus', validCampus);
+  formData.append('location', location || '');
+
+  if (deadline) {formData.append('deadline', deadline);}
+  //if (image) formData.append('image', image);
+
+  onSubmit(formData, image);
+};
+
 
   return (
     <form onSubmit={handleSubmit} className="mb-6 p-4 border rounded">
@@ -106,7 +112,7 @@ const TaskForm = ({ editingTask, setEditingTask, onSubmit }) => {
         />
       </div>
 
-      {/* Type in sentence */}
+      {/* Type */}
       <div className="mb-4">
         <label className="block mb-1">Type</label>
         {loadingTypes ? (
