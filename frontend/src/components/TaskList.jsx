@@ -1,5 +1,4 @@
 import { useAuth } from '../context/AuthContext';
-import axiosInstance from '../axiosConfig';
 
 const TaskList = ({ tasks, setEditingTask, onDelete, onApprove, onReject }) => {
   const { user } = useAuth();
@@ -12,7 +11,7 @@ const TaskList = ({ tasks, setEditingTask, onDelete, onApprove, onReject }) => {
         <div key={task._id} className="bg-gray-100 p-4 mb-4 rounded shadow">
           <h2 className="font-bold">{task.title}</h2>
           <p>{task.description}</p>
-{task.deadline && (
+          {task.deadline && (
             <p className="text-sm text-gray-500">
               Deadline: {new Date(task.deadline).toLocaleDateString()}
             </p>
