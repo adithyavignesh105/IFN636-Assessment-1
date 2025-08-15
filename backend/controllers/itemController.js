@@ -6,7 +6,6 @@ const addItem = async (req, res) => {
     const { title, description, type, campus, location, deadline } = req.body;
 
     console.log('addItem req.body:', req.body);
-    console.log('addItem req.file:', req.file);
 
     const item = await Item.create({
       userId: req.user.id,
@@ -21,12 +20,11 @@ const addItem = async (req, res) => {
     res.status(201).json(item);
   } catch (error) {
     console.error('addItem error:', error);
-    // 回傳真實錯誤訊息給測試捕捉
     res.status(500).json({ message: error.message });
   }
 };
 
-// Get approved items（for user listing）
+// Get approved items
 const getApprovedItems = async (req, res) => {
   try {
     const items = await Item.find({ status: 'approved' });
@@ -36,7 +34,7 @@ const getApprovedItems = async (req, res) => {
   }
 };
 
-// Get own items（for user managing item）
+// Get own items
 const getMyItems = async (req, res) => {
   try {
     const items = await Item.find({ userId: req.user.id });
@@ -46,7 +44,7 @@ const getMyItems = async (req, res) => {
   }
 };
 
-// Update item（by user）
+// Update item
 const updateItem = async (req, res) => {
   try {
     const item = await Item.findById(req.params.id);
@@ -62,6 +60,7 @@ const updateItem = async (req, res) => {
     if (type) item.type = type;
     if (campus) item.campus = campus;
     if (location) item.location = location;
+    // if (req.file) item.image = `/uploads/${req.file.filename}`;
     if (deadline) item.deadline = deadline;
 
     const updatedItem = await item.save();

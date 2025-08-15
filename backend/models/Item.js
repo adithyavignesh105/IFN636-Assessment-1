@@ -1,13 +1,12 @@
-
 const mongoose = require('mongoose');
 
 const itemSchema = new mongoose.Schema({
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     title: { type: String, required: true },
     description: { type: String },
-    type: { type: String, enum: ['Lost', 'Found'], required: true },
-    image: { type: String, required: false },
-    campus: {type:String, enum: ['Gardens Point', 'Kelvin Grove'] , default: 'Gardens Point'},
+    type: { type: String, required: true }, // remove enum
+    // image: { type: String, required: false },
+    campus: { type: String, default: 'Gardens Point' }, // remove enum
     location: { type: String },
     status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
     createdAt: { type: Date, default: Date.now },
