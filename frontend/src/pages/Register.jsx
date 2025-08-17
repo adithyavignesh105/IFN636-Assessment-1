@@ -3,16 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../axiosConfig';
 
 const Register = () => {
-  const [formData, setFormData] = useState({ name: '', email: '', password: '' });
+  const [formData, setFormData] = useState({ name: '', email: '', password: '', university: '', address: '' });
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       await axiosInstance.post('/api/auth/register', formData);
-      alert('Registration successful. Please log in.');
       navigate('/login');
-    } catch (error) {
+    } catch {
       alert('Registration failed. Please try again.');
     }
   };
@@ -22,7 +21,6 @@ const Register = () => {
       <form onSubmit={handleSubmit} className="bg-white p-6 shadow-md rounded">
         <h1 className="text-2xl font-bold mb-4 text-center">Register</h1>
         <input
-          type="text"
           placeholder="Name"
           value={formData.name}
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -41,6 +39,18 @@ const Register = () => {
           value={formData.password}
           onChange={(e) => setFormData({ ...formData, password: e.target.value })}
           className="w-full mb-4 p-2 border rounded"
+        />
+        <input
+          placeholder="University"
+          value={formData.university}
+          onChange={(e) => setFormData({ ...formData, university: e.target.value })}
+          className="w-full mb-4 p-2 border rounded"
+        />
+        <input
+          placeholder="Address"
+          value={formData.address}
+          onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+          className="w-full mb-6 p-2 border rounded"
         />
         <button type="submit" className="w-full bg-green-600 text-white p-2 rounded">
           Register

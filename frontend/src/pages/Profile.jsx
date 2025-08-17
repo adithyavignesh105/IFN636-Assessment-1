@@ -1,95 +1,39 @@
-import { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useEffect, useState } from 'react';
 import axiosInstance from '../axiosConfig';
+import { useAuth } from '../context/AuthContext';
 
 const Profile = () => {
-  const { user } = useAuth(); // Access user token from context
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    university: '',
-    address: '',
-  });
-  const [loading, setLoading] = useState(false);
+  const { user, login } = useAuth();
+  const [form, setForm] = useState({ name: '', email: '', university: '', address: '' });
 
   useEffect(() => {
-    // Fetch profile data from the backend
-    const fetchProfile = async () => {
-      setLoading(true);
-      try {
-        const response = await axiosInstance.get('/api/auth/profile', {
-          headers: { Authorization: `Bearer ${user.token}` },
-        });
-        setFormData({
-          name: response.data.name,
-          email: response.data.email,
-          university: response.data.university || '',
-          address: response.data.address || '',
-        });
-      } catch (error) {
-        alert('Failed to fetch profile. Please try again.');
-      } finally {
-        setLoading(false);
-      }
+    const load = async () => {
+      const res = await axiosInstance.get('/api/auth/profile', {
+        headers: { Authorization: `Bearer ${user?.token}` },
+      });
+      setForm(res.data);
     };
-
-    if (user) fetchProfile();
+    if (user) load();
   }, [user]);
 
-  const handleSubmit = async (e) => {
+  const save = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    try {
-      await axiosInstance.put('/api/auth/profile', formData, {
-        headers: { Authorization: `Bearer ${user.token}` },
-      });
-      alert('Profile updated successfully!');
-    } catch (error) {
-      alert('Failed to update profile. Please try again.');
-    } finally {
-      setLoading(false);
-    }
+    const res = await axiosInstance.put('/api/auth/profile', form, {
+      headers: { Authorization: `Bearer ${user?.token}` },
+    });
+    login(res.data);
+    alert('Profile updated');
   };
 
-  if (loading) {
-    return <div className="text-center mt-20">Loading...</div>;
-  }
-
   return (
-    <div className="max-w-md mx-auto mt-20">
-      <form onSubmit={handleSubmit} className="bg-white p-6 shadow-md rounded">
-        <h1 className="text-2xl font-bold mb-4 text-center">Your Profile</h1>
-        <input
-          type="text"
-          placeholder="Name"
-          value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          className="w-full mb-4 p-2 border rounded"
-        />
-        <input
-          type="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          className="w-full mb-4 p-2 border rounded"
-        />
-        <input
-          type="text"
-          placeholder="University"
-          value={formData.university}
-          onChange={(e) => setFormData({ ...formData, university: e.target.value })}
-          className="w-full mb-4 p-2 border rounded"
-        />
-        <input
-          type="text"
-          placeholder="Address"
-          value={formData.address}
-          onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-          className="w-full mb-4 p-2 border rounded"
-        />
-        <button type="submit" className="w-full bg-blue-600 text-white p-2 rounded">
-          {loading ? 'Updating...' : 'Update Profile'}
-        </button>
+    <div className="max-w-lg mx-auto p-6">
+      <h1 className="text-2xl font-bold mb-4">Profile</h1>
+      <form onSubmit={save} className="space-y-3">
+        <input className="w-full border p-2 rounded" placeholder="Name" value={form.name || ''} onChange={e=>setForm({...form, name:e.target.value})}/>
+        <input className="w-full border p-2 rounded" placeholder="Email" value={form.email || ''} onChange={e=>setForm({...form, email:e.target.value})}/>
+        <input className="w-full border p-2 rounded" placeholder="University" value={form.university || ''} onChange={e=>setForm({...form, university:e.target.value})}/>
+        <input className="w-full border p-2 rounded" placeholder="Address" value={form.address || ''} onChange={e=>setForm({...form, address:e.target.value})}/>
+        <button className="bg-blue-600 text-white px-4 py-2 rounded">Save</button>
       </form>
     </div>
   );
